@@ -4,6 +4,7 @@
  * or otherwise invalid.
  */
 import { autoPressCost, marketingCost } from "./economy.js";
+import { produce } from "./resources.js";
 import {
   FLOUR_BATCH_SIZE,
   FLOUR_PER_CAKE,
@@ -14,15 +15,12 @@ import {
 } from "./types.js";
 
 export function apply(state: GameState, action: Action): GameState {
+  if (state.act === 3) return state;
   switch (action.type) {
     case "MANUAL_PRESS": {
       const need = state.clickYield * FLOUR_PER_CAKE;
       if (state.flour < need) return state;
-      return {
-        ...state,
-        flour: state.flour - need,
-        mooncakes: state.mooncakes + state.clickYield,
-      };
+      return produce(state, state.clickYield);
     }
 
     case "BUY_AUTO_PRESS": {
@@ -33,12 +31,9 @@ export function apply(state: GameState, action: Action): GameState {
 
     case "BUY_FLOUR": {
       const cost = state.flourPrice;
-      if (state.cash < cost) return state;
-      return {
-        ...state,
-        cash: state.cash - cost,
-        flour: state.flour + FLOUR_BATCH_SIZE,
-      };
+      const flour = state.flour + FLOUR_BATCH_SIZE + state.flourBonus;
+      if (state.cash < cost || !Number.isFinite(flour)) return state;
+      return { ...state, cash: state.cash - cost, flour };
     }
 
     case "SET_PRICE": {

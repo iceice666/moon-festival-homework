@@ -6,7 +6,7 @@
  */
 
 /** Bumped whenever GameState gains, drops or reshapes a field. See save.ts. */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 4;
 
 /** SPEC §2 S-3: fixed timestep. */
 export const TICK_MS = 100;
@@ -63,12 +63,20 @@ export interface GameState {
   mooncakes: number;
   sold: number;
 
+  /** Fractional work/demand, never counted as an actual mooncake. In [0, 1). */
+  productionProgress: number;
+  salesProgress: number;
+
   // Act 1 production & market
   price: number;
   clickYield: number;
   autoPress: number;
   marketingLevel: number;
   flourPrice: number;
+  flourBonus: number;
+  /** Reserved for an Act 2 project unlock; unavailable in Act 1 UI. */
+  autoBuyFlour: boolean;
+  autoBuyThreshold: number;
 
   /** Unlocked achievement ids. Added in schema v2. */
   achievements: string[];
@@ -92,11 +100,16 @@ export function initialState(seed = 0x9e3779b9): GameState {
     flour: 1000,
     mooncakes: 0,
     sold: 0,
+    productionProgress: 0,
+    salesProgress: 0,
     price: 0.25,
     clickYield: 1,
     autoPress: 0,
     marketingLevel: 1,
     flourPrice: 50,
+    flourBonus: 0,
+    autoBuyFlour: false,
+    autoBuyThreshold: 100,
     achievements: [],
     log: [],
   };

@@ -94,7 +94,9 @@ describe("save", () => {
 
       const { state, recovered } = loadState(raw);
       expect(recovered).toBe(false);
-      expect(state).toEqual(initialState(state.rngSeed));
+      expect(state).toEqual({ ...initialState(state.rngSeed), log: state.log });
+      expect(state.log).toHaveLength(1);
+      expect(state.log[0]!.text).toContain("存檔");
     }
   });
 

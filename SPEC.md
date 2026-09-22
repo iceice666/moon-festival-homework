@@ -91,7 +91,9 @@ UI 只能讀 `state` 與派發 `Action`，禁止直接寫入 `state`。
   - 麵粉不足時：不產出、不扣款、不報錯，Action 為 no-op。
 - **自動壓模機**：數量 `autoPress`，每台每秒產出 1 顆。
   - 購買成本：`cost(n) = ceil(5 × 1.1^n)`，`n` 為目前持有數。
-- 每 tick 產量 `= autoPress × dt`，且受麵粉上限箝制（`min(想產量, flour / 單顆耗粉量)`）。
+- 月餅只能整顆生產與販售，`mooncakes`、`sold`、`clickYield` 皆為整數。
+- 每 tick 將 `autoPress × dt` 累積至 `productionProgress`；整數部分才產出月餅並扣除麵粉，產量上限為 `floor(flour / 單顆耗粉量)`。小數部分保留為製作進度，不算庫存、不預扣麵粉。
+- 麵粉不足製作下一顆時清除製作進度，不累積缺料期間的產能；進度僅保留 `[0, 1)` 的小數，整數邊界須容忍浮點誤差。
 - 單顆耗粉量 `FLOUR_PER_CAKE = 1`（可由專案降低）。
 
 #### 原料市場
@@ -114,7 +116,10 @@ demandRate(顆/秒) =
 - `BASE_DEMAND = 0.5`，`REFERENCE_PRICE = 0.25`，`ELASTICITY = 1.15`
 - `marketingMult = 1.5 ^ (marketingLevel - 1)`，`marketingLevel` 初始 1
   - 升級成本：`cost(l) = 100 × 3^(l-1)`
-- 每 tick 實際售出 `= min(mooncakes, demandRate × dt)`，收入 `= 售出量 × price`
+- 有庫存時，每 tick 將 `demandRate × dt` 累積至 `salesProgress`，實際售出 `= min(mooncakes, floor(salesProgress))`，收入 `= 整顆售出量 × price`；未滿一顆的需求保留至下一 tick。
+- 無庫存或售罄時清除購買進度，未滿足的需求不累積成欠單；進度永遠落於 `[0, 1)`。
+- `productionProgress` 與 `salesProgress` 初始皆為 0，存於 `GameState` 並隨存檔保存。
+- v3 舊存檔升級 v4 時，庫存及累計售出各自取整數部分，被移除的小數依單顆耗粉量退回麵粉，已取得的現金保留，並記錄遷移提示。
 
 #### 月相與中秋（主題機制）
 以遊戲內時間 `gameTime`（秒）驅動，與真實日期無關，確保可測。
