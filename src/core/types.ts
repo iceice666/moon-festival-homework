@@ -5,7 +5,8 @@
  * Nothing in this file may import DOM, React, or any I/O.
  */
 
-export const SCHEMA_VERSION = 1;
+/** Bumped whenever GameState gains, drops or reshapes a field. See save.ts. */
+export const SCHEMA_VERSION = 2;
 
 /** SPEC §2 S-3: fixed timestep. */
 export const TICK_MS = 100;
@@ -69,6 +70,8 @@ export interface GameState {
   marketingLevel: number;
   flourPrice: number;
 
+  /** Unlocked achievement ids. Added in schema v2. */
+  achievements: string[];
   log: LogEntry[];
 }
 
@@ -94,6 +97,7 @@ export function initialState(seed = 0x9e3779b9): GameState {
     autoPress: 0,
     marketingLevel: 1,
     flourPrice: 50,
+    achievements: [],
     log: [],
   };
 }
