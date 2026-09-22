@@ -123,7 +123,8 @@ demandRate(顆/秒) =
 - `phase = (gameTime mod LUNAR_CYCLE) / LUNAR_CYCLE`，`phase = 0.5` 為滿月
 - 照度 `illumination = (1 - cos(2π × phase)) / 2`，值域 `[0, 1]`
 - `phaseMult = 0.6 + 0.8 × illumination`，值域 `[0.6, 1.4]`
-- **中秋**：每 4 個朔望週期的滿月，即 `gameTime mod 720 === 360`（每 12 分鐘一次）
+- **中秋**：每 4 個朔望週期的滿月，即 `gameTime mod 720 === 450`（每 12 分鐘一次，首次於 7.5 分鐘）
+  - 峰值必須落在滿月：滿月位於 `90 + 180k`，故約束為 `(峰值偏移 - 90) mod 180 === 0`。450 = 90 + 180×2 滿足。
   - 中秋前後 30 秒內，`festivalMult` 由 1.0 線性升至峰值 `3.0` 再線性降回 1.0
   - 其餘時間 `festivalMult = 1.0`
 - UI 需顯示月相圖示與「距離中秋 mm:ss」倒數
@@ -413,7 +414,7 @@ SECURITY.md            # 列出所有 intentional 弱點
 ### 月相與中秋
 - **AC-11** `gameTime = 90`（半週期）時 `illumination === 1`；`gameTime = 0` 時 `illumination === 0`。
 - **AC-12** `phaseMult` 在任意 `gameTime` 皆落於 `[0.6, 1.4]`。
-- **AC-13** `gameTime = 540` 時 `festivalMult === 3.0`；`gameTime = 300` 時 `festivalMult === 1.0`。
+- **AC-13** `gameTime = FESTIVAL_PEAK_OFFSET` 時 `festivalMult === 3.0`；距峰值 60 秒時 `festivalMult === 1.0`。且峰值當下 `illumination === 1`（中秋必為滿月）。驗證時不得使用寫死的時間常數，需引用 `FESTIVAL_PEAK_OFFSET`。
 - **AC-14** 倒數字串在中秋當下為 `00:00`，且永不為負值。
 
 ### 狀態轉換

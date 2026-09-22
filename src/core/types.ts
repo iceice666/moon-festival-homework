@@ -24,7 +24,12 @@ export const MAX_PRICE = 999;
 /** SPEC §3.1: lunar cycle is 180s; 中秋 every 4th cycle (720s = 12min). */
 export const LUNAR_CYCLE = 180;
 export const FESTIVAL_PERIOD = 720;
-export const FESTIVAL_PEAK_OFFSET = 360;
+/**
+ * 中秋 must fall on a full moon, and full moons sit at LUNAR_CYCLE/2 + k*LUNAR_CYCLE.
+ * Therefore (FESTIVAL_PEAK_OFFSET - LUNAR_CYCLE/2) % LUNAR_CYCLE must be 0.
+ * 450 = 90 + 180*2 satisfies this and puts the first 中秋 at 7.5 minutes.
+ */
+export const FESTIVAL_PEAK_OFFSET = 450;
 export const FESTIVAL_WINDOW = 30;
 export const FESTIVAL_PEAK_MULT = 3.0;
 

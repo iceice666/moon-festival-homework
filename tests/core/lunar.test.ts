@@ -7,6 +7,7 @@ import {
 } from "../../src/core/economy.js";
 import {
   FESTIVAL_PEAK_MULT,
+  FESTIVAL_PEAK_OFFSET,
   FESTIVAL_PERIOD,
   LUNAR_CYCLE,
 } from "../../src/core/types.js";
@@ -27,9 +28,12 @@ describe("lunar phase", () => {
   });
 
   it("AC-13: 中秋當下乘數為 3.0，平日為 1.0", () => {
-    expect(festivalMult(360)).toBeCloseTo(FESTIVAL_PEAK_MULT, 10);
-    expect(festivalMult(360 + FESTIVAL_PERIOD)).toBeCloseTo(FESTIVAL_PEAK_MULT, 10);
-    expect(festivalMult(300)).toBeCloseTo(1, 10);
+    expect(festivalMult(FESTIVAL_PEAK_OFFSET)).toBeCloseTo(FESTIVAL_PEAK_MULT, 10);
+    expect(festivalMult(FESTIVAL_PEAK_OFFSET + FESTIVAL_PERIOD)).toBeCloseTo(
+      FESTIVAL_PEAK_MULT,
+      10,
+    );
+    expect(festivalMult(FESTIVAL_PEAK_OFFSET - 60)).toBeCloseTo(1, 10);
     expect(festivalMult(0)).toBeCloseTo(1, 10);
   });
 
@@ -41,13 +45,15 @@ describe("lunar phase", () => {
     }
   });
 
-  it("AC-13: 中秋當下必為滿月", () => {
-    expect(illumination(360)).toBeCloseTo(1, 10);
+  it("AC-13: 中秋當下必為滿月（防止峰值偏移到非滿月）", () => {
+    expect(illumination(FESTIVAL_PEAK_OFFSET)).toBeCloseTo(1, 10);
+    expect((FESTIVAL_PEAK_OFFSET - LUNAR_CYCLE / 2) % LUNAR_CYCLE).toBe(0);
+    expect(FESTIVAL_PERIOD % LUNAR_CYCLE).toBe(0);
   });
 
   it("AC-14: 倒數在中秋當下為 0，且恆不為負", () => {
-    expect(timeToFestival(360)).toBeCloseTo(0, 10);
-    expect(timeToFestival(0)).toBeCloseTo(360, 10);
+    expect(timeToFestival(FESTIVAL_PEAK_OFFSET)).toBeCloseTo(0, 10);
+    expect(timeToFestival(0)).toBeCloseTo(FESTIVAL_PEAK_OFFSET, 10);
 
     for (let t = 0; t < FESTIVAL_PERIOD * 3; t += 0.5) {
       const remaining = timeToFestival(t);
