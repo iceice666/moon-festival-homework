@@ -77,6 +77,9 @@ describe("economy", () => {
       }
     }
 
+    // Guard against a vacuous test: the run must actually restock at least once.
+    expect(bought).toBeGreaterThan(0);
+
     const produced = s.mooncakes + s.sold;
     const consumed = start.flour + bought - s.flour;
     expect(consumed).toBeCloseTo(produced, 6);
